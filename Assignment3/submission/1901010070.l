@@ -1,20 +1,30 @@
 %option noyywrap
 %{
-    #include <stdlib.h>
-    #include <stdio.h>
-    #include <stdbool.h>
-    #include <string.h>
-    #define SIZE 100
-    #define TWO 2
-    #define ONE (TWO/TWO)
-    #define ZERO (ONE - ONE)
-    int lval, line=1, column=1, idx1=1, idx2=0;
-    int num = ZERO + ONE;
-
-    char* arr[SIZE];
-    char* numarr[SIZE];
-
-    int install_id(), install_num();
+	/*
+		Running 
+		1. $ lex 190101070.l
+		2. $ gcc lex.yy.c
+		3. $ ./a.out
+	*/
+	#include <stdlib.h>
+	#include <stdio.h>
+	#include <string.h>
+	#include <stdbool.h>
+	#define TWO 2
+	#define ONE TWO/TWO
+	#define ZERO TWO - TWO
+	#define SIZE ONE * TWO * 50
+	int lval, line = 1, col = 1, idx = 0,idx2=0;
+	struct Data {
+	   char* data;   
+	   int let_num;
+	   int block_num;
+	};
+	int new_num = ZERO;
+	struct Data arr[SIZE];
+	struct Data numarr[SIZE];
+	int install_id();
+	int install_num();
 %}
 
 delim [ \t]
@@ -22,107 +32,118 @@ ws {delim}+
 letter [A-Za-z]
 digit [0-9]
 id {letter}({letter}|{digit})*
-number {digit}+(\.{digit}+)?(E[+-]?{digit}+)
+number {digit}+(\.{digit}+)?(E[+-]?{digit}+)?
 
 %%
 
-{ws} 
+{ws} {/* no action and no return */}
 \n {line++;}
 EOF {return 0;}
-PROGRAM {lval=1; return(num);}
-VAR {lval++; num+=1; return(num);}
-BEGIN {lval++; num+=1; return(num);}
-END {lval++; num+=1; return(num);}
-"END." {lval++; num+=1; return(num);}
-INTEGER {lval++; num+=1; return(num);}
-FOR {lval++; num+=1; return(num);}
-READ {lval++; num+=1; return(num);}
-WRITE {lval++; num+=1; return(num);}
-TO {lval++; num+=1; return(num);}
-DO {lval++; num+=1; return(num);}
-";" {lval++; num+=1; return(num);}
-":" {lval++; num+=1; return(num);}
-"," {lval++; num+=1; return(num);}
-":=" {lval++; num+=1; return(num);}
-"+" {lval++; num+=1; return(num);}
-"-" {lval++; num+=1; return(num);}
-"*" {lval++; num+=1; return(num);}
-DIV {lval++; num+=1; return(num);}
-"(" {lval++; num+=1; return(num);}
-")" {lval++; num+=1; return(num);}
-id {lval++; num+=1; return(num);}
-int {lval++; num+=1; return(num);}
+PROGRAM {lval=1; return(1);}
+VAR {lval++; return(2);}
+BEGIN {lval++; return(3);}
+END {lval++; return(4);}
+"END." {lval++; return(5);}
+INTEGER  {lval++; return(lval);}
+FOR {lval++; return(lval);}
+READ {lval++; return(lval);}
+WRITE {lval++; return(lval);}
+TO {lval++; return(lval);}
+DO {lval++; return(lval);}
+";" {lval++; return(lval);}
+":" {lval++; return(lval);}
+"," {lval++; return(lval);}
+":=" {lval++; return(lval);}
+"+" {lval++; return(lval);}
+"-" {lval++; return(lval);}
+"*" {lval++; return(lval);}
+DIV {lval++; return(lval);}
+"(" {lval++; return(lval);}
+")" {lval++; return(lval);}
+id {lval++; return(lval);}
+int {lval++; return(lval);}
 {id} {lval = (int) install_id(); return(22);}
 {number} {lval = (int) install_num(); return(23);}
 %%
 
-int findId(char *x, int l) {
-    int tmp = 0;
-    for(int i=0; i<l; i++) {
-        tmp += x[i];
-    }
-    return tmp % SIZE;
+/* int findIndex(char *x,int len){
+	int temp = 0;
+	for(int i=0;i<len;i++){
+		temp+=x[i];
+	}
+	return temp%SIZE;
+} */
+
+int install_id(){
+	int key = idx;
+	if(arr[key].data == NULL){
+		arr[key].data = yytext;
+	}else{
+		printf("Conflict\n");
+	}
+	idx++;
+	return key;
 }
 
-int install_id() {
-    int k;
-    k = ONE * idx1;
-    if(arr[k] == NULL) {
-        arr[k] = txt;
-    } else {
-        printf("Conflict");
-    } 
-    idx1++;
-    return k;
+int install_num(){
+	int key = idx2;
+	if(numarr[key].data == NULL){
+		numarr[key].data = yytext;
+	}else{
+		printf("Conflict\n");
+	}
+	idx2++;
+	return key;
 }
 
-int install_num() {
-    int k;
-    k = ONE * idx2;
-    if(numarr[k] == NULL) {
-        numarr[k] = txt;
-    } else {
-        printf("Conflict");
-    } 
-    idx2++;
-    return k;
-}
 
-int main(int argc, char* argv[]) {
-    if(argc <= 1) {
-        
-    } else {
-        FILE *f = fopen(argv[1], "r");
-        if(f*) yyin = f*
-        else {}
-    }
-    printf("%-10s %-10s %-20s\n","LINE NO","TOKEN NO","TOKEN SPECIFIER");
-
-    int i == yylex(), prev = 0;
-    while(i != 0) {
-        int number = 0;
-        if(line == prev) {
-        
-        } else {
-            number = line;
-            prev = line;
-        } 
-
-        switch(i) {
-            case 22: {
-                number ? printf("%-10d %-10d ^%-20s\n",number,i,arr[lval]) : printf("%-10s %-10d ^%-20s\n","",i,arr[lval]);
+int main(int argc, char* argv[])
+{
+	if(argc > 1)
+	{
+		FILE *file = fopen(argv[1], "r");
+		if(file)
+			yyin = file;
+	}
+	{
+		printf("%-10s %-10s %-20s\n","LINE NO","TOKEN NO","TOKEN SPECIFIER");
+	}
+	int i, prevline =0;
+	while((i=yylex()) != 0)
+	{
+		int num = 0;
+		if(line != prevline){
+			num = line;
+			prevline = line;
+		}
+		switch(i)
+		{
+			case 22:
+				{
+					if(num == 0) {
+						printf("%-10s %-10d ^%-20s\n","",i,arr[lval].data);
+					} else {
+						printf("%-10d %-10d ^%-20s\n",num,i,arr[lval].data);
+					}
 					break;
-            }
-            case 23: {
-                number ?  printf("%-10d %-10d #%-20s\n",number,i,numarr[lval]) : printf("%-10s %-10d #%-20s\n","",i,numarr[lval]); 
+				}
+			case 23:
+				{
+					if(num == 0) {
+						printf("%-10s %-10d #%-20s\n","",i,numarr[lval].data);
+					} else {
+					printf("%-10d %-10d #%-20s\n",num,i,numarr[lval].data); 
+					}
 					break;
-            }
-            default:
-            {
-                number ? printf("%-10d %-10d\n",number,i): printf("%-10s %-10d\n","",i)
-                break;
-            }
-        }
-    }
-    return 1;
+				}
+			default:
+				{
+					if(num == 0) {
+						printf("%-10s %-10d\n","",i);
+					} else {printf("%-10d %-10d\n",num,i);}
+					break;
+				}
+		}
+	}
+	return 1;
 }
